@@ -431,3 +431,8 @@ QVector3D Util::vecFromString(QString s)
 
     return QVector3D(sl[0].toFloat(), sl[1].toFloat(),sl[2].toFloat());
 }
+
+
+int Util::getGreyscaleIntensity(const QColor& color) {
+    return color.red(); // Since R, G, and B are equal in greyscale, any channel works.
+}
