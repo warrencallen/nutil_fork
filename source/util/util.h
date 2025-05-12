@@ -69,6 +69,8 @@ class Util {
 
 public:
 
+    static int getGreyscaleIntensity(const QColor& color);
+
     static QElapsedTimer globalTimer;
 
 
