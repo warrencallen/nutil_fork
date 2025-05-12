@@ -108,71 +108,63 @@ void NLImage::FractalAnalyze()
         return;
 }
 
-void NLImage::FindAreas(QColor testColor, QVector3D colorWidth, Counter* counter, QVector<Area>* m_areas,int pixelCutoff, int pMax)
-{
-
-    if (m_index!=nullptr)
+void NLImage::FindAreas(QColor testColor, QVector3D colorWidth, Counter* counter, QVector<Area>* m_areas, int pixelCutoff, int pMax) {
+    if (m_index != nullptr) {
         delete m_index;
+    }
 
     m_index = createImage(m_image->width(), m_image->height());
 
-
     bool isBfs = true;
-    if (Data::data.m_settings!=nullptr)
-        isBfs = Data::data.m_settings->getString("fill_method")=="bfs";
+    if (Data::data.m_settings != nullptr) {
+        isBfs = Data::data.m_settings->getString("fill_method") == "bfs";
+    }
 
     m_index->fill(unset);
-    for (int i=0;i<m_index->width();i++)
-        for (int j=0;j<m_index->height();j++)
-            m_index->setPixel(i,j, unset.rgba());
+    for (int i = 0; i < m_index->width(); i++) {
+        for (int j = 0; j < m_index->height(); j++) {
+            m_index->setPixel(i, j, unset.rgba());
+        }
+    }
 
-    counter->Init(m_image->width()*m_image->height());
-//    qDebug() << "Color threshold : " << testColor << colorWidth;
+    counter->Init(m_image->width() * m_image->height());
 
-
-    for (int i=0;i<m_image->width();i++)
-        for (int j=0;j<m_image->height();j++) {
+    for (int i = 0; i < m_image->width(); i++) {
+        for (int j = 0; j < m_image->height(); j++) {
             counter->Tick();
-            if (Data::data.abort)
+            if (Data::data.abort) {
                 return;
+            }
 
             // Check if unset
+            if (QColor(m_index->getPixel(i, j)) == unset) {
+                QColor pix = QColor(m_image->getPixel(i, j));
 
+                // Calculate greyscale intensity
+                int intensity = Util::getGreyscaleIntensity(pix);
 
-
-            if (QColor(m_index->getPixel(i,j)) == unset) {
-                QColor pix = QColor(m_image->getPixel(i,j));
-  //              if (pix.red()!=0)
-//                    qDebug() << pix.red();
-
-                bool found = Util::QVector3DIsClose( pix, testColor, colorWidth );
-   //             if (!(pix.red()==255 && pix.green()==255 && pix.blue()==255))
-//                   if (rand()%1000>998)
- //                      qDebug() << "TESTING  " << found << pix.red() << pix.green()<<pix.blue();
-//                if (pix == testColor) {
+                // Check if the pixel matches the test color
+                bool found = Util::QVector3DIsClose(pix, testColor, colorWidth);
                 if (found) {
-                    Area area;
-                    if (isBfs)
-                        FillAreaBFS(area, i,j, testColor, colorWidth, pMax);
-                    else
-                        FillAreaDFS(area, i,j, testColor, colorWidth, pMax);
+                    // Add intensity to total pixel area
+                    m_totalPixelArea += intensity;
 
-                    area.CalculateStatistics();
-                    //if (area.m_pixelArea!=0)
-                    //    qDebug() << area.m_pixelArea;
-                    if (area.m_pixelArea>=pixelCutoff) {
-                        m_areas->append(area);
-//                        qDebug() << "Area found" << m_areas->size() << " ," << area.m_pixelArea;
+                    // Process the area
+                    Area area;
+                    if (isBfs) {
+                        FillAreaBFS(area, i, j, testColor, colorWidth, pMax);
+                    } else {
+                        FillAreaDFS(area, i, j, testColor, colorWidth, pMax);
                     }
 
+                    if (area.m_pixelCount >= pixelCutoff) {
+                        m_areas->append(area);
+                    }
                 }
             }
         }
-  //  qDebug() << "B";
-
-    std::sort(m_areas->begin(), m_areas->end());
+    }
 }
-
 
 void NLImage::FillAreaDFS(Area &area, const int i, const int j, const QColor& testColor, const QVector3D& spread,int pMax)
 {
