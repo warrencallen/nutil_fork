@@ -13,7 +13,7 @@ public:
     ~LImageQImage() {
         Release();
     }
-
+    
     void Initialize(int width, int height) override;
 
     void setPixel(int x, int y, unsigned int color) override;
@@ -45,7 +45,7 @@ public:
     QImage* ApplyEffectToImage(QImage& src, QGraphicsBlurEffect *effect);
 
     void CreateGrid(int x, int y, QColor color, int strip,float zoom, QPoint center);
-
+    int CalculateTotalGreyscaleIntensity();
 };
 
 #endif // LIMAGEQIMAGE_H
