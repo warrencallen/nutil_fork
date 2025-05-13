@@ -269,4 +269,18 @@ void LImageQImage::fromQImage(QImage *img, LColorList &lst)
 
             m_qImage->setPixel(i,j,col);
         }
+
+int LImageQImage::CalculateTotalGreyscaleIntensity() {
+    if (!m_qImage) return 0;
+
+    int totalIntensity = 0;
+    for (int i = 0; i < m_qImage->width(); ++i) {
+        for (int j = 0; j < m_qImage->height(); ++j) {
+            QColor color = m_qImage->pixelColor(i, j);
+            int intensity = Util::getGreyscaleIntensity(color);
+            totalIntensity += intensity;
+        }
+    }
+    return totalIntensity;
+}
 }
